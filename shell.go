@@ -57,6 +57,22 @@ func writeShellFile(aliases map[string]string, shellType string) {
 	}
 }
 
+func sourceHint() string {
+	shellType := "bash"
+	cfg, err := loadConfig()
+	if err == nil {
+		shellType = cfg.Shell
+	}
+	if shellType == "fish" {
+		return "source $HOME/.alias_manager/aliases.fish"
+	}
+	return "source ~/.alias_manager/aliases.sh"
+}
+
+func printSourceHint() {
+	fmt.Printf("  → Run '%s' to apply in this session\n", sourceHint())
+}
+
 func rebuildShellFile() {
 	aliases, err := loadAliases()
 	if err != nil {
@@ -94,6 +110,7 @@ func rebuildShellFileCommand() {
 		shellName = "aliases.fish"
 	}
 	fmt.Printf("  ✓ Rebuilt %s with %d aliases\n", shellName, len(aliases))
+	printSourceHint()
 }
 
 func shellIntegrationCommand() {

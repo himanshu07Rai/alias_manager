@@ -76,6 +76,7 @@ func createAlias(name, command string, force bool) {
 	rebuildShellFile()
 
 	fmt.Printf("  ✓ Created: %s='%s'\n", name, command)
+	printSourceHint()
 }
 
 func deleteAlias(name string, yes bool) {
@@ -103,6 +104,7 @@ func deleteAlias(name string, yes bool) {
 	rebuildShellFile()
 
 	fmt.Printf("  ✓ Deleted: %s\n", name)
+	printSourceHint()
 }
 
 func editAlias(name string, newCommand *string) {
@@ -127,6 +129,7 @@ func editAlias(name string, newCommand *string) {
 		saveAliases(aliases)
 		rebuildShellFile()
 		fmt.Printf("  ✓ Updated: %s='%s'\n", name, *newCommand)
+		printSourceHint()
 		return
 	}
 
@@ -141,6 +144,7 @@ func editAlias(name string, newCommand *string) {
 	saveAliases(aliases)
 	rebuildShellFile()
 	fmt.Printf("  ✓ Updated: %s='%s'\n", name, input)
+	printSourceHint()
 }
 
 func listAliases(pattern string) {
@@ -244,6 +248,9 @@ func importAliases(filePath string, overwrite bool) {
 	}
 
 	fmt.Printf("  ✓ Imported %d, skipped %d\n", importedCount, skippedCount)
+	if importedCount > 0 {
+		printSourceHint()
+	}
 }
 
 func exportAliases(filePath string) {
