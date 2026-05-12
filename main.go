@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+var stdinReader = bufio.NewReader(os.Stdin)
+
 func main() {
 	initPaths()
 
@@ -95,6 +97,16 @@ func createCommand(args []string) {
 		}
 	}
 
+	if (!nameSet || len(cmdParts) == 0) && isInteractive() {
+		tuiName, tuiCmd, ok := runCreateTUI()
+		if !ok {
+			fmt.Println("  Cancelled.")
+			return
+		}
+		createAlias(tuiName, tuiCmd, force)
+		return
+	}
+
 	if !nameSet || len(cmdParts) == 0 {
 		fmt.Fprintln(os.Stderr, "  ✗ Usage: alias_manager create <name> <command> [--force]")
 		os.Exit(1)
@@ -133,9 +145,31 @@ func editCommand(args []string) {
 	if len(args) >= 2 {
 		newCommand := strings.Join(args[1:], " ")
 		editAlias(name, &newCommand)
-	} else {
-		editAlias(name, nil)
+		return
 	}
+
+	aliases, err := loadAliases()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "  ✗ %v\n", err)
+		os.Exit(1)
+	}
+	oldCmd, exists := aliases[name]
+	if !exists {
+		fmt.Fprintf(os.Stderr, "  ✗ Alias '%s' not found.\n", name)
+		os.Exit(1)
+	}
+
+	if isInteractive() {
+		newCmd, ok := runEditTUI(name, oldCmd)
+		if !ok {
+			fmt.Println("  Cancelled.")
+			return
+		}
+		editAlias(name, &newCmd)
+		return
+	}
+
+	editAlias(name, nil)
 }
 
 func importCommand(args []string) {
@@ -168,8 +202,7 @@ func exportCommand(args []string) {
 
 func promptInput(prompt string) string {
 	fmt.Print(prompt)
-	reader := bufio.NewReader(os.Stdin)
-	input, err := reader.ReadString('\n')
+	input, err := stdinReader.ReadString('\n')
 	if err != nil {
 		fmt.Println()
 		os.Exit(0)
