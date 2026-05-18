@@ -9,6 +9,8 @@ import (
 
 var stdinReader = bufio.NewReader(os.Stdin)
 
+var version = "1.1.2"
+
 func main() {
 	initPaths()
 
@@ -50,6 +52,8 @@ func main() {
 		rebuildShellFileCommand()
 	case "shell-integration":
 		shellIntegrationCommand()
+	case "version":
+		printVersion()
 	case "help", "--help", "-h":
 		printHelp()
 	default:
@@ -74,10 +78,15 @@ Commands:
   add-to-shell            Add shell integration hook to RC file
   rebuild-shell-file      Rebuild shell aliases file from JSON storage
   shell-integration       Print aliases in shell-compatible format
+  version                 Show the current version
   help                    Show this help message
 
 Categories for suggest: navigation, git, system, utility, fun
 `)
+}
+
+func printVersion() {
+	fmt.Printf("alias_manager version %s\n", version)
 }
 
 func createCommand(args []string) {
